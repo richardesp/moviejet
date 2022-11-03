@@ -1,9 +1,10 @@
-from flask import Flask
+from flask import Flask, render_template
 from database.get_connection import get_connection
 from database.init_db import init_db
 from database.insert_db import insert_db
 import click
 from flask.cli import with_appcontext
+import database.user_controller as user_controller
 
 app = Flask(__name__)
 app.config.from_pyfile("config/config.py")
@@ -18,15 +19,19 @@ def get_select():
     connection.close()
     return str(result)
 
+@app.route('/usuarios')
+def get_users():
+    users = user_controller.get_users()
+    return render_template('users.html', users=users)
 
 @click.command("init-db")
 @with_appcontext
 def init_db_command():
     """Clear the existing data and create new tables"""
     init_db()
-    click.echo("Database initialized correctly!")
+    click.echo("Database initialized correctly! 🚀")
     insert_db()
-    click.echo("All records in the database have been inserted correctly!")
+    click.echo("All records in the database have been inserted correctly! 🔋")
 
 
 app.cli.add_command(init_db_command)
