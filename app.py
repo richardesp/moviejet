@@ -8,6 +8,7 @@ import database.user_controller as user_controller
 import database.providers_controller as providers_controller
 import database.movies_controller as movies_controller
 import database.rentals_controller as rentals_controller
+import database.ratings_controller as ratings_controller
 from datetime import date
 
 app = Flask(__name__)
@@ -38,6 +39,12 @@ def get_rentals():
     return render_template('rentals.html', rentals=rentals)
 
 
+@app.route('/valoraciones')
+def get_ratings():
+    ratings = ratings_controller.get_ratings()
+    return render_template('ratings.html', ratings=ratings)
+
+
 @app.route('/methods/crear_pelicula', methods=['POST'])
 def create_movie():
     title = request.form['title']
@@ -50,13 +57,13 @@ def create_movie():
     exists = movies_controller.get_movie_by_title(title)
     if exists is not None:
         return render_template('add_movie.html',
-                               error='Violación de integridad de clave primaria: La película ya ha sido agregada')
+                               error='Violación de integridad de clave primaria: La película ya ha sido agregada 🔑')
 
     # Second foreign key check
     exists = providers_controller.get_provider_by_company(provider)
     if exists is None:
         return render_template('add_movie.html',
-                               error='Violación de integridad de clave foránea: La empresa proveedora no existe')
+                               error='Violación de integridad de clave foránea: La empresa proveedora no existe 🔐')
 
     movies_controller.insert_movie(title, category, description, provider, units)
     return redirect('/peliculas')
@@ -74,19 +81,19 @@ def create_rental():
     exists = rentals_controller.get_rental_by_title_and_owner(title, owner)
     if exists is not None:
         return render_template('add_rental.html',
-                               error='Violación de integridad de clave primaria: El alquiler ya ha sido creado')
+                               error='Violación de integridad de clave primaria: El alquiler ya ha sido creado 🔑')
 
     # Second foreign key check (with movie)
     exists = movies_controller.get_movie_by_title(title)
     if exists is None:
         return render_template('add_rental.html',
-                               error='Violación de integridad de clave foránea: La película introducida no existe')
+                               error='Violación de integridad de clave foránea: La película introducida no existe 🔐')
 
     # Third foreign key check (with user)
     exists = user_controller.get_user_by_nick(owner)
     if exists is None:
         return render_template('add_rental.html',
-                               error='Violación de integridad de clave foránea: El usuario introducido no existe')
+                               error='Violación de integridad de clave foránea: El usuario introducido no existe 🔐')
 
     # We must check if the movie is available with the total units
     units = movies_controller.get_movie_units(title)
@@ -114,6 +121,41 @@ def create_rental():
     return redirect('/alquileres')
 
 
+@app.route('/methods/crear_valoracion', methods=['POST'])
+def create_rating():
+    title = request.form['title']
+    author = request.form['author']
+    score = request.form['rating']
+    comment = request.form['comment']
+
+    # First primary key check
+    exists = ratings_controller.get_rating_by_title_and_author(title, author)
+    if exists is not None:
+        return render_template('add_rating.html',
+                               error='Violación de integridad de clave primaria: La valoración ya ha sido creada 🔑')
+
+    # Second foreign key check (with movie)
+    exists = movies_controller.get_movie_by_title(title)
+    if exists is None:
+        return render_template('add_rating.html',
+                               error='Violación de integridad de clave foránea: La película introducida no existe 🔐')
+
+    # Third foreign key check (with user)
+    exists = user_controller.get_user_by_nick(author)
+    if exists is None:
+        return render_template('add_rating.html',
+                               error='Violación de integridad de clave foránea: El usuario introducido no existe 🔐')
+
+    # We must check if the score is between 0 and 10
+    if float(score) < 0 or float(score) > 10:
+        return render_template('add_rating.html',
+                               error='Restricción del dominio del problema: La puntuación debe estar entre 0 y 10 🧿')
+
+    ratings_controller.insert_rating(title, score, comment, author)
+
+    return redirect('/valoraciones')
+
+
 @app.route('/methods/crear_proveedor', methods=['POST'])
 def create_provider():
     company = request.form['company']
@@ -123,7 +165,7 @@ def create_provider():
     exists = providers_controller.get_provider_by_company(company)
     if exists is not None:
         return render_template('add_provider.html',
-                               error='Violación de integridad de clave primaria: La empresa ya ha sido creada')
+                               error='Violación de integridad de clave primaria: La empresa ya ha sido creada 🔑')
 
     providers_controller.insert_provider(company, nif, phone)
     return redirect('/proveedores')
@@ -146,6 +188,11 @@ def delete_movie():
 @app.route('/alquileres/agregar_alquiler')
 def add_rental():
     return render_template('add_rental.html')
+
+
+@app.route('/valoraciones/agregar_valoracion')
+def add_rating():
+    return render_template('add_rating.html')
 
 
 @app.route('/proveedores/agregar_proveedor')
@@ -173,6 +220,12 @@ def edit_user(id):
 def edit_rental(owner, title):
     rental = rentals_controller.get_rental_by_title_and_owner(title, owner)
     return render_template('edit_rental.html', rental=rental)
+
+
+@app.route('/valoraciones/editar_valoracion/<string:author>/<string:title>')
+def edit_rating(author, title):
+    rating = ratings_controller.get_rating_by_title_and_author(title, author)
+    return render_template('edit_rating.html', rating=rating)
 
 
 @app.route('/peliculas/editar_pelicula/<string:id>')
@@ -204,7 +257,7 @@ def update_movie():
         movie = movies_controller.get_movie_by_title(title)
 
         return render_template('edit_movie.html',
-                               error='Violación de integridad de clave foránea: La empresa proveedora no existe',
+                               error='Violación de integridad de clave foránea: La empresa proveedora no existe 🔐',
                                movie=movie)
 
     movies_controller.update_movie(title, category, description, provider, units)
@@ -238,13 +291,33 @@ def update_rental():
     return redirect('/alquileres')
 
 
+@app.route('/methods/editar_valoracion', methods=['POST'])
+def update_rating():
+    author = request.form['author']
+    title = request.form['title']
+    rating = request.form['rating']
+    comment = request.form['comment']
+
+    # We must check that the rating is between 0 and 10
+    if float(rating) < 0 or float(rating) > 10:
+        rating = ratings_controller.get_rating_by_title_and_author(title, author)
+
+        return render_template('edit_rating.html',
+                               error='Restricción del dominio del problema: La valoración debe estar entre 0 y 10 estrellas (⭐) 🧿',
+                               rating=rating)
+
+    ratings_controller.update_rating(title, rating, comment, author)
+
+    return redirect('/valoraciones')
+
+
 @app.route('/methods/crear_usuario', methods=['POST'])
 def create_user():
     nick = request.form['nick']
 
     exists = user_controller.get_user_by_nick(nick)
     if exists is not None:
-        return render_template('add_user.html', error='Violación de integridad de clave primaria: El nick ya existe')
+        return render_template('add_user.html', error='Violación de integridad de clave primaria: El nick ya existe 🔑')
 
     name = request.form['name']
     email = request.form['email']
@@ -270,6 +343,14 @@ def delete_rental():
     movies_controller.increase_units(title)
 
     return redirect('/alquileres')
+
+
+@app.route('/methods/eliminar_valoracion', methods=['POST'])
+def delete_rating():
+    author = request.form['author']
+    title = request.form['title']
+    ratings_controller.delete_rating(title, author)
+    return redirect('/valoraciones')
 
 
 @app.route('/proveedores/editar_proveedor/<string:id>')

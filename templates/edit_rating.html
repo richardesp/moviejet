@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}
+    Editar valoración
+{% endblock %}
+{% block contenido %}
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                {% if error %}
+                    <div class="notification is-danger">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                <h3 class="is-size-3">Editar alquiler</h3>
+                <form action="{{ url_for('update_rating') }}" method="post">
+                    {# Send the title in a hidden bar #}
+                    <input type="hidden" name="title" id="title" value="{{ rating[0] }}">
+                    {# Send the author in a title bar #}
+                    <input type="hidden" name="author" id="author" value="{{ rating[3] }}">
+                    <label for="rating">Puntuación</label>
+                    <input value="{{ rating[1] }}" required type="number" min="0" max="10" class="input"
+                           placeholder="7.5"
+                           name="rating" id="rating">
+                    <label for="comment">Comentario</label>
+                    <input value="{{ rating[2] }}" required type="text" class="input" placeholder="Una gran película"
+                           name="comment" id="comment">
+                    <button type="submit" class="button is-success mt-2">Guardar</button>
+                    <a href="{{ url_for('get_ratings') }}" class="button is-primary mt-2">Volver</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

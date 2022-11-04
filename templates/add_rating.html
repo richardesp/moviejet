@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}
+    Agregar valoración
+{% endblock %}
+{% block contenido %}
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                {% if error %}
+                    <div class="notification is-danger">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                <h3 class="is-size-3">Agregar valoración</h3>
+                <form action="{{ url_for('create_rating') }}" method="post">
+                    <label for="title">Película</label>
+                    <input required type="text" class="input" placeholder="Titanic" name="title" id="title">
+                    <label for="rating">Puntuación</label>
+                    <input required type="number" class="input" min="0" max="10" placeholder="7" name="rating"
+                           id="rating">
+                    <label for="comment">Comentario</label>
+                    <input required type="text" class="input" placeholder="Gran película" name="comment" id="comment">
+                    <label for="author">Autor</label>
+                    <input required type="text" class="input" placeholder="john_doe" name="author" id="author">
+                    <button type="submit" class="button is-success mt-2">Guardar</button>
+                    <a href="{{ url_for('get_ratings') }}" class="button is-primary mt-2">Volver</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
