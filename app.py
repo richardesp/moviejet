@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 from database.get_connection import get_connection
 from database.init_db import init_db
 from database.insert_db import insert_db
@@ -10,19 +10,53 @@ app = Flask(__name__)
 app.config.from_pyfile("config/config.py")
 
 
-@app.route('/getSelect')
-def get_select():
-    connection = get_connection()
-    with connection.cursor() as cursor:
-        cursor.execute('SELECT * FROM Usuario')
-        result = cursor.fetchall()
-    connection.close()
-    return str(result)
-
 @app.route('/usuarios')
 def get_users():
     users = user_controller.get_users()
     return render_template('users.html', users=users)
+
+
+@app.route('/usuarios/agregar_usuario')
+def add_user():
+    return render_template('add_user.html')
+
+
+@app.route('/usuarios/editar_usuario/<string:id>')
+def edit_user(id):
+    user = user_controller.get_user_by_nick(id)
+    return render_template('edit_user.html', user=user)
+
+
+@app.route('/methods/editar_usuario', methods=['POST'])
+def update_user():
+    nick = request.form['nick']
+    name = request.form['name']
+    email = request.form['email']
+    user_controller.update_user(nick, name, email)
+    return redirect('/usuarios')
+
+
+@app.route('/methods/crear_usuario', methods=['POST'])
+def create_user():
+    nick = request.form['nick']
+
+    exists = user_controller.get_user_by_nick(nick)
+    if exists is not None:
+        return render_template('add_user.html', error='Violación de integridad de clave primaria: El nick ya existe')
+
+    name = request.form['name']
+    email = request.form['email']
+
+    user_controller.insert_user(nick, name, email)
+    return redirect('/usuarios')
+
+
+@app.route('/methods/eliminar_usuario', methods=['POST'])
+def delete_user():
+    nick = request.form['nick']
+    user_controller.delete_user(nick)
+    return redirect('/usuarios')
+
 
 @click.command("init-db")
 @with_appcontext
@@ -52,8 +86,8 @@ def insert_records():
 
 
 @app.route('/')
-def hello_world():  # put application's code here
-    return 'Hello World!'
+def get_index():  # put application's code here
+    return render_template('base.html')
 
 
 if __name__ == '__main__':
