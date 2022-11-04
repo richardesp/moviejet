@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titulo %}
+    Agregar alquiler
+{% endblock %}
+{% block contenido %}
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                {% if error %}
+                    <div class="notification is-danger">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                <h3 class="is-size-3">Agregar alquiler</h3>
+                <form action="{{ url_for('create_rental') }}" method="post">
+                    <label for="title">Película</label>
+                    <input required type="text" class="input" placeholder="Titanic" name="title" id="title">
+                    <label for="owner">Propietario</label>
+                    <input required type="text" class="input" placeholder="john_doe" name="owner"
+                           id="owner">
+                    <label for="start">Fecha inicio</label>
+                    <input required type="date" class="input" placeholder="{{ today }}" value="{{ today }}"
+                           name="start" id="start">
+                    <label for="end">Fecha fin</label>
+                    <input required type="date" class="input" placeholder="{{ today }}" value="{{ today }}"
+                           name="end" id="end">
+                    <label for="type">Tipo de alquiler</label>
+                    <select id="type" name="type" class="input">
+                        <option value="PLAZO">PLAZO</option>
+                        <option value="TOTAL">TOTAL</option>
+                    </select>
+                    <button type="submit" class="button is-success mt-2">Guardar</button>
+                    <a href="{{ url_for('get_rentals') }}" class="button is-primary mt-2">Volver</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

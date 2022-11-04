@@ -15,7 +15,7 @@
     <div class="navbar-brand">
         <a href="{{ url_for('get_index') }}" class="navbar-item">
             <img alt="Moviejet's logo"
-                 src="../static/img/logo_moviejet.png"
+                 src="/static/img/logo_moviejet.png"
                  style="max-height: 80px"/>
         </a>
         <button class="navbar-burger is-warning button" aria-label="menu" aria-expanded="false"
@@ -35,11 +35,14 @@
         <div class="navbar-start">
             <a class="navbar-item" href="{{ url_for('get_movies') }}">Películas</a>
         </div>
+        <div class="navbar-start">
+            <a class="navbar-item" href="{{ url_for('get_rentals') }}">Alquileres</a>
+        </div>
         <div class="navbar-end">
             <div class="navbar-item">
                 <div class="buttons">
                     <a href="mailto:i92esper@uco.es" class="button is-primary">
-                        <strong>Contacto con el administrador</strong>
+                        <strong>Contactar con el administrador</strong>
                     </a>
                 </div>
             </div>

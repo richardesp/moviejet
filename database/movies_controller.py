@@ -41,3 +41,30 @@ def update_movie(title, category, description, provider, units):
         cursor.execute(
             'UPDATE Pelicula SET categoria = %s, descripcion = %s, empresa_proveedora = %s, unidades = %s WHERE titulo = %s',
             (category, description, provider, units, title))
+
+
+def decrease_units(title):
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE Pelicula SET unidades = unidades - 1 WHERE titulo = %s',
+            (title,))
+
+
+def increase_units(title):
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'UPDATE Pelicula SET unidades = unidades + 1 WHERE titulo = %s',
+            (title,))
+
+
+def get_movie_units(title):
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            'SELECT unidades FROM Pelicula WHERE titulo = %s',
+            (title,))
+        units = cursor.fetchone()
+
+    return units[0]

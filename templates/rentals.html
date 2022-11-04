@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %} Alquileres {% endblock %}
+{% block contenido %}
+
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                <h3 class="is-size-3">Alquileres</h3>
+                <a href="{{ url_for('add_rental') }}" class="button is-success">Agregar</a>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Película</th>
+                        <th>Propietario (nick)</th>
+                        <th>Fecha inicio</th>
+                        <th>Fecha fin</th>
+                        <th>Tipo de alquiler</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for rental in rentals %}
+                        <tr>
+                            <td>{{ rental[0] }}</td>
+                            <td>{{ rental[1] }}</td>
+                            <td>{{ rental[2] }}</td>
+                            <td>{{ rental[3] }}</td>
+                            <td>{{ rental[4] }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_rental', owner=rental[1], title=rental[0]) }}"
+                                   class="button is-info">Editar</a>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('delete_rental') }}" method="POST">
+                                    <input type="hidden" id="title" name="title" value="{{ rental[0] }}">
+                                    <input type="hidden" id="owner" name="owner" value="{{ rental[1] }}">
+                                    <button class="button is-danger">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+{% endblock %}
