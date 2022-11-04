@@ -6,6 +6,7 @@ import click
 from flask.cli import with_appcontext
 import database.user_controller as user_controller
 import database.providers_controller as providers_controller
+import database.movies_controller as movies_controller
 
 app = Flask(__name__)
 app.config.from_pyfile("config/config.py")
@@ -21,6 +22,36 @@ def get_users():
 def get_providers():
     providers = providers_controller.get_providers()
     return render_template('providers.html', providers=providers)
+
+
+@app.route('/peliculas')
+def get_movies():
+    movies = movies_controller.get_movies()
+    return render_template('movies.html', movies=movies)
+
+
+@app.route('/methods/crear_pelicula', methods=['POST'])
+def create_movie():
+    title = request.form['title']
+    category = request.form['category']
+    description = request.form['description']
+    provider = request.form['provider']
+    units = request.form['units']
+
+    # First primary key check
+    exists = movies_controller.get_movie_by_title(title)
+    if exists is not None:
+        return render_template('add_movie.html',
+                               error='Violación de integridad de clave primaria: La película ya ha sido agregada')
+
+    # Second foreign key check
+    exists = providers_controller.get_provider_by_company(provider)
+    if exists is None:
+        return render_template('add_movie.html',
+                               error='Violación de integridad de clave foránea: La empresa proveedora no existe')
+
+    movies_controller.insert_movie(title, category, description, provider, units)
+    return redirect('/peliculas')
 
 
 @app.route('/methods/crear_proveedor', methods=['POST'])
@@ -45,6 +76,13 @@ def delete_provider():
     return redirect('/proveedores')
 
 
+@app.route('/methods/eliminar_pelicula', methods=['POST'])
+def delete_movie():
+    title = request.form['title']
+    movies_controller.delete_movie(title)
+    return redirect('/peliculas')
+
+
 @app.route('/proveedores/agregar_proveedor')
 def add_provider():
     return render_template('add_provider.html')
@@ -55,10 +93,21 @@ def add_user():
     return render_template('add_user.html')
 
 
+@app.route('/peliculas/agregar_pelicula')
+def add_movie():
+    return render_template('add_movie.html')
+
+
 @app.route('/usuarios/editar_usuario/<string:id>')
 def edit_user(id):
     user = user_controller.get_user_by_nick(id)
     return render_template('edit_user.html', user=user)
+
+
+@app.route('/methods/editar_pelicula/<string:id>')
+def edit_movie(id):
+    movie = movies_controller.get_movie_by_title(id)
+    return render_template('edit_movie.html', movie=movie)
 
 
 @app.route('/methods/editar_usuario', methods=['POST'])
@@ -68,6 +117,27 @@ def update_user():
     email = request.form['email']
     user_controller.update_user(nick, name, email)
     return redirect('/usuarios')
+
+
+@app.route('/methods/editar_pelicula', methods=['POST'])
+def update_movie():
+    title = request.form['title']
+    category = request.form['category']
+    description = request.form['description']
+    provider = request.form['provider']
+    units = request.form['units']
+
+    # Second foreign key check
+    exists = providers_controller.get_provider_by_company(provider)
+    if exists is None:
+        movie = movies_controller.get_movie_by_title(title)
+
+        return render_template('edit_movie.html',
+                               error='Violación de integridad de clave foránea: La empresa proveedora no existe',
+                               movie=movie)
+
+    movies_controller.update_movie(title, category, description, provider, units)
+    return redirect('/peliculas')
 
 
 @app.route('/methods/crear_usuario', methods=['POST'])

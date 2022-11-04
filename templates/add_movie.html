@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}
+    Agregar película
+{% endblock %}
+{% block contenido %}
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                {% if error %}
+                    <div class="notification is-danger">
+                        {{ error }}
+                    </div>
+                {% endif %}
+                <h3 class="is-size-3">Agregar película</h3>
+                <form action="{{ url_for('create_movie') }}" method="post">
+                    <label for="title">Título</label>
+                    <input required type="text" class="input" placeholder="Titanic" name="title" id="title">
+                    <label for="category">Categoría</label>
+                    <input required type="text" class="input" placeholder="Romance" name="category"
+                           id="category">
+                    <label for="description">Descripción</label>
+                    <input required type="text" class="input" placeholder="Un romance en el Titanic" name="description"
+                           id="description">
+                    <label for="provider">Empresa proveedora</label>
+                    <input required type="text" class="input" placeholder="Paramount Pictures" name="provider"
+                           id="provider">
+                    <label for="units">Unidades</label>
+                    <input required type="number" min="0" class="input" placeholder="100" name="units" id="units">
+                    <button type="submit" class="button is-success mt-2">Guardar</button>
+                    <a href="{{ url_for('get_movies') }}" class="button is-primary mt-2">Volver</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
