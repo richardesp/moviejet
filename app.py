@@ -5,6 +5,7 @@ from database.insert_db import insert_db
 import click
 from flask.cli import with_appcontext
 import database.user_controller as user_controller
+import database.providers_controller as providers_controller
 
 app = Flask(__name__)
 app.config.from_pyfile("config/config.py")
@@ -14,6 +15,39 @@ app.config.from_pyfile("config/config.py")
 def get_users():
     users = user_controller.get_users()
     return render_template('users.html', users=users)
+
+
+@app.route('/proveedores')
+def get_providers():
+    providers = providers_controller.get_providers()
+    return render_template('providers.html', providers=providers)
+
+
+@app.route('/methods/crear_proveedor', methods=['POST'])
+def create_provider():
+    company = request.form['company']
+    nif = request.form['nif']
+    phone = request.form['phone']
+
+    exists = providers_controller.get_provider_by_company(company)
+    if exists is not None:
+        return render_template('add_provider.html',
+                               error='Violación de integridad de clave primaria: La empresa ya ha sido creada')
+
+    providers_controller.insert_provider(company, nif, phone)
+    return redirect('/proveedores')
+
+
+@app.route('/methods/eliminar_proveedor', methods=['POST'])
+def delete_provider():
+    company = request.form['company']
+    providers_controller.delete_provider(company)
+    return redirect('/proveedores')
+
+
+@app.route('/proveedores/agregar_proveedor')
+def add_provider():
+    return render_template('add_provider.html')
 
 
 @app.route('/usuarios/agregar_usuario')
@@ -56,6 +90,21 @@ def delete_user():
     nick = request.form['nick']
     user_controller.delete_user(nick)
     return redirect('/usuarios')
+
+
+@app.route('/proveedores/editar_proveedor/<string:id>')
+def edit_provider(id):
+    provider = providers_controller.get_provider_by_company(id)
+    return render_template('edit_provider.html', provider=provider)
+
+
+@app.route('/methods/editar_proveedor', methods=['POST'])
+def update_provider():
+    company = request.form['company']
+    nif = request.form['nif']
+    phone = request.form['phone']
+    providers_controller.update_provider(company, nif, phone)
+    return redirect('/proveedores')
 
 
 @click.command("init-db")

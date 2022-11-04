@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}
+    Editar proveedor
+{% endblock %}
+{% block contenido %}
+    <section class="section">
+        <div class="columns">
+            <div class="column">
+                <h3 class="is-size-3">Editar proveedor</h3>
+                <form action="{{ url_for('update_provider') }}" method="post">
+                    {# Send the id in a hidden bar #}
+                    <input type="hidden" name="company" id="company" value="{{ provider[0] }}">
+                    <label for="nif">NIF</label>
+                    <input value="{{ provider[1] }}" required type="number" class="input" placeholder="123456"
+                           name="nif" id="nif">
+                    <label for="phone">Teléfono</label>
+                    <input value="{{ provider[2] }}" required type="text" class="input" placeholder="123-456-789"
+                           name="phone" id="phone">
+                    <button type="submit" class="button is-success mt-2">Guardar</button>
+                    <a href="{{ url_for('get_providers') }}" class="button is-primary mt-2">Volver</a>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

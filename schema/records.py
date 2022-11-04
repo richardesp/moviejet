@@ -3,6 +3,7 @@ instructions = [
     "INSERT INTO Usuario VALUES ('javice22', 'javice@uco.es', 'Javier Casado Eliche')",
     "INSERT INTO Usuario VALUES ('alvarogamingcode', 'avocado@outlook.com', 'Álvaro Cortés González')",
     "INSERT INTO Usuario VALUES ('richardesp', 'richardesp@outlook.es', 'Ricardo Espantaleón Pérez')",
+    "INSERT INTO Usuario VALUES ('josemariacalvo', 'josemariacalvo@gmail.com', 'José María Calvo')",
     "INSERT INTO Proveedor VALUES ('Sony', 6578123, '768-312-768')",
     "INSERT INTO Proveedor VALUES ('Warner Bros', 576172, '678-325-542')",
     "INSERT INTO Proveedor VALUES ('Walt Disney', 568135, '957-324-361')",
