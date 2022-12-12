@@ -1,0 +1,90 @@
+SET SERVEROUTPUT ON;
+
+-- Ejercicio 3: tipo para números de teléfonos
+
+CREATE OR REPLACE TYPE tel_lista_t AS VARRAY(2) OF VARCHAR(20);
+
+-- Ejercicio 1: Creación de tipos para proveedores y películas
+
+CREATE OR REPLACE TYPE Proveedor_t AS OBJECT (
+    empresa VARCHAR(64),
+    NIF NUMBER,
+    telefono tel_lista_t
+);
+
+CREATE OR REPLACE TYPE Valoracion_t AS OBJECT (
+    titulo_pelicula VARCHAR(64),
+    puntuacion FLOAT,
+    comentario VARCHAR(128),
+    nick_autor VARCHAR(32)
+);
+
+CREATE TYPE Valoraciones_peliculas_t AS TABLE OF Valoracion_t;
+
+CREATE OR REPLACE TYPE Pelicula_t AS OBJECT (
+    titulo VARCHAR(64),
+    categoria VARCHAR(64),
+    -- Ejercicio 2: tabla anidada
+    empresa_proveedora REF Proveedor_t,
+    valoracion_pelicula Valoraciones_peliculas_t,
+    unidades INTEGER,
+    
+    MEMBER FUNCTION 
+    valoracion_media RETURN FLOAT,
+    PRAGMA RESTRICT_REFERENCES(valoracion_media, WNDS, WNPS)
+);
+
+
+CREATE OR REPLACE TYPE BODY Pelicula_t AS
+MEMBER FUNCTION valoracion_media RETURN FLOAT IS
+i INTEGER;
+media FLOAT := 0;
+nota_actual FLOAT;
+total_valoraciones NUMBER := 0;
+valoracion Valoracion_t;
+
+BEGIN
+    FOR i IN 1..SELF.valoracion_pelicula.COUNT LOOP
+        valoracion := SELF.valoracion_pelicula(i);
+        media := media + valoracion.puntuacion;
+        total_valoraciones := total_valoraciones + 1;
+    END LOOP;
+    
+    media := media / total_valoraciones;
+    
+RETURN media;
+END;
+END;
+
+-- CREACIÓN DE LA TABLA
+
+DROP TABLE Proveedor_tab;
+
+CREATE TABLE Proveedor_tab OF Proveedor_t 
+(NIF PRIMARY KEY);
+
+DROP TABLE Valoracion_tab;
+
+CREATE TABLE Valoracion_tab OF Valoracion_t
+(PRIMARY KEY(titulo_pelicula, nick_autor));
+
+DROP TABLE Pelicula_tab;
+
+CREATE TABLE Pelicula_tab OF Pelicula_t (
+    PRIMARY KEY(titulo),
+    SCOPE FOR (empresa_proveedora) IS Proveedor_tab
+)
+NESTED TABLE valoracion_pelicula STORE AS Valoraciones_tab;
+
+-- Inserts
+INSERT INTO Proveedor_tab VALUES('Sony', 456712, tel_lista_t('768-672-789', '748-432-987'));
+INSERT INTO Proveedor_tab VALUES('Warner', 879172, tel_lista_t('743-435-123', '775-575-321'));
+
+INSERT INTO Valoracion_tab VALUES('El padrino', 7.5, 'Un poco lenta al principio', 'nicklodel');
+INSERT INTO Valoracion_tab VALUES('El padrino', 10, 'La mejor sin duda de la saga', 'javice22');
+
+INSERT INTO Pelicula_tab VALUES('El padrino', 'Mafias',(SELECT REF(p) FROM Proveedor_tab p WHERE empresa = 'Sony'), Valoraciones_peliculas_t(), 10);
+
+INSERT INTO THE (SELECT P.valoracion_pelicula FROM Pelicula_tab P WHERE P.titulo = 'El padrino') SELECT * FROM Valoracion_tab WHERE titulo_pelicula = 'El padrino';
+
+SELECT P.valoracion_media() FROM Pelicula_tab P WHERE titulo = 'El padrino'

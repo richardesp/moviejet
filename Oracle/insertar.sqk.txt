@@ -1,0 +1,10 @@
+INSERT INTO USUARIO VALUES('nicklodel', 'nicklodel@gmail.com', 'Nicolás López Delgado');
+INSERT INTO USUARIO VALUES('javice22', 'javice@uco.es', 'Javier Casado Eliche');
+INSERT INTO USUARIO VALUES('alvarogamingcode', 'avocado@outlook.com', 'Álvaro Cortés González');
+
+INSERT INTO PROVEEDOR VALUES('Sony', 6578123, '768-312-768');
+INSERT INTO PROVEEDOR VALUES('Warner Bros', 576172, '678-325-542');
+INSERT INTO PROVEEDOR VALUES('Walt Disney', 568135, '957-324-361');
+
+INSERT INTO PELICULA VALUES('El Padrino', 'Mafias', 'La apasionante vida de Don Vito Corleone', 'Warner Bros', 10);
+INSERT INTO PELICULA VALUES('Piratas del Caribe', 'Piratas', 'Jack Sparrow recorriendo El Caribe', 'Walt Disney', 10); 
